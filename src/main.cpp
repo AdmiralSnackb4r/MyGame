@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <player.hpp>
+#include <world.hpp>
 
 int initialize(SDL_Window*& window, SDL_Renderer*& renderer) {
 
@@ -20,8 +21,8 @@ int initialize(SDL_Window*& window, SDL_Renderer*& renderer) {
     // Window creation
     window = SDL_CreateWindow(
         "Game Title",
-        1000, // width in pixelsadd_subdirectory(thirdparty/SDL_ttf EXCLUDE_FROM_ALL)
-        800, // height in pixels
+        1920, // width in pixels
+        1080, // height in pixels
         SDL_WINDOW_OPENGL
     );
 
@@ -51,6 +52,7 @@ int main(int argc, char** argv){
     SDL_Renderer* renderer = nullptr;
     bool done = false;
 
+    World::World* world = new World::World();
     Player::Player* player = new Player::Player();
 
     std::cout << "Hello, from MyGame!\n";
@@ -67,9 +69,10 @@ int main(int argc, char** argv){
                 done = true;
             }
         }
-
+        
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+        world->renderWorld(renderer);
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderFillRect(renderer, &player->getHitbox());
@@ -79,6 +82,8 @@ int main(int argc, char** argv){
 
 
     // Clean up
+    delete player;
+    delete world;
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

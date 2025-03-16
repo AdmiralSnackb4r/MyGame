@@ -1,0 +1,20 @@
+# Ignore the build directory (compiled files)
+build/
+
+# Ignore thirdparty directory
+thirdparty/
+
+# Ignore CMake temporary files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Ignore compiled object files and executables
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
