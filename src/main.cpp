@@ -3,6 +3,7 @@
 #include <SDL3/SDL_main.h>
 #include <player.hpp>
 #include <world.hpp>
+#include <cmath>
 
 int initialize(SDL_Window*& window, SDL_Renderer*& renderer) {
 
@@ -53,7 +54,7 @@ int main(int argc, char** argv){
     bool done = false;
 
     World::World* world = new World::World();
-    Player::Player* player = new Player::Player();
+    Player::Player* player = new Player::Player(100, 100);
 
     std::cout << "Hello, from MyGame!\n";
 
@@ -76,6 +77,15 @@ int main(int argc, char** argv){
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderFillRect(renderer, &player->getHitbox());
+
+        // Moving Direction of Player
+        #ifdef DEBUG_MODE
+            float rad = player->getMovingDirection().angle * M_PI / 180.0f;
+            float x1 = player->getPosition().x + 60 * cos(rad);
+            float y1 = player->getPosition().y - 60 * sin(rad);
+            SDL_RenderLine(renderer, (int)player->getPosition().x,
+                    (int)player->getPosition().y, (int)x1, (int)y1);
+        #endif
 
         SDL_RenderPresent(renderer);
     }

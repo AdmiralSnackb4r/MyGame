@@ -7,17 +7,35 @@
 
 namespace Player {
 
+    const int playerWidth = 50;
+    const int playerHeight = 50;
+
+    struct MovingDirection {
+        float angle;
+        float velocity;
+        float acceleration;
+    };
+
+    struct Position {
+        int x;
+        int y;
+    };
+
     class Player {
 
         public:
-            Player();
+            Player(int x, int y);
             ~Player();
 
             const SDL_FRect& getHitbox() const;
+            const MovingDirection getMovingDirection();
+            const Position getPosition();
 
         private:
-            const SDL_FRect mHitbox = { 100, 100, 50, 50}; // Hitbox properties
+            SDL_FRect mHitbox; // Hitbox properties
             std::vector<int> mActiveSprite = {0};
+            MovingDirection mMovingDirection;
+            Position mPosition;
 
 
     };
