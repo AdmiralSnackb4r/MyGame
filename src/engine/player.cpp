@@ -1,4 +1,5 @@
 #include "player.hpp"
+#include <cmath>
 
 Player::Player::Player(int x, int y) {
     #ifdef DEBUG_MODE
@@ -12,9 +13,10 @@ Player::Player::Player(int x, int y) {
     mPosition.x = x;
     mPosition.y = y;
 
-    mHitbox = {(x - static_cast<float>(playerWidth)/2),
-               (y - static_cast<float>(playerHeight)/2),
-                playerWidth, playerHeight};
+    mStatus.onGround = true;
+
+    updateHitbox();
+
 }
 
 Player::Player::~Player() {
@@ -33,4 +35,18 @@ const Player::MovingDirection Player::Player::getMovingDirection() {
 
 const Player::Position Player::Player::getPosition() {
     return mPosition;
+}
+
+void Player::Player::walkTo(float angle) {
+    if (mStatus.onGround) {
+        mMovingDirection.angle = angle;
+        mPosition.x = static_cast<int>(mPosition.x + (walkingSpeed * cos(angle)));
+        updateHitbox();
+    }
+}
+
+void Player::Player::updateHitbox() {
+    mHitbox = {(mPosition.x - static_cast<float>(playerWidth)/2),
+        (mPosition.y - static_cast<float>(playerHeight)/2),
+         playerWidth, playerHeight};
 }
