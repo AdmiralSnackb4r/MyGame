@@ -48,26 +48,6 @@ int initialize(SDL_Window*& window, SDL_Renderer*& renderer) {
     return 0;
 }
 
-int pressedKeyHandler(SDL_Event* event, Player::Player* player) {
-    switch (event->key.key) {  // Fixed: `key.keysym.sym` should be used
-        case SDLK_W:
-            std::cout << "Wee" << std::endl;
-            break;
-        case SDLK_D:
-            player->walkTo(RIGHT_ANGLE);
-            break;
-        case SDLK_A:
-            player->walkTo(LEFT_ANGLE);
-            break;
-        default:
-            #ifdef DEBUG_MODE
-            std::cerr << "Unhandled key press: " << SDL_GetKeyName(event->key.key) << std::endl;
-            #endif
-            break;
-    }
-    return 0;
-}
-
 int releasedKeyHandler(SDL_Event* event) {
 #ifdef DEBUG_MODE
     std::cerr << "Key released: " << SDL_GetKeyName(event->key.key) << std::endl;
@@ -75,26 +55,19 @@ int releasedKeyHandler(SDL_Event* event) {
     return 0;
 }
 
-int eventHandler(SDL_Event* event, Player::Player* player) {
+int keyBoardPolling(Player::Player* player) {
 
     const bool* keyState = SDL_GetKeyboardState(nullptr);
 
-    switch (event->type) {
-        case SDL_EVENT_KEY_DOWN:
-            return pressedKeyHandler(event, player);
-        case SDL_EVENT_KEY_UP:
-            return releasedKeyHandler(event);
-        default:
-            if (keyState[SDL_SCANCODE_D]) {
-                player->walkTo(RIGHT_ANGLE);
-                return 0;
-            }
-            if (keyState[SDL_SCANCODE_A]) {
-                player->walkTo(LEFT_ANGLE);
-                return 0;
-            }
-            return 0;
+    if (keyState[SDL_SCANCODE_D]) {
+        player->walkTo(RIGHT_ANGLE);
+        return 0;
     }
+    if (keyState[SDL_SCANCODE_A]) {
+        player->walkTo(LEFT_ANGLE);
+        return 0;
+    }
+    return 0;
 }
 
 
@@ -104,8 +77,8 @@ int main(int argc, char** argv){
     SDL_Renderer* renderer = nullptr;
     bool done = false;
 
-    World::World* world = new World::World();
     Player::Player* player = new Player::Player(100, 100);
+    World::World* world = new World::World(player);
 
     std::cout << "Hello, from MyGame!\n";
 
@@ -120,15 +93,14 @@ int main(int argc, char** argv){
             if (event.type == SDL_EVENT_QUIT) {
                 done = true;
             }
-            if (eventHandler(&event, player) != 0) {
-                return 1;
-            }
         }
         
-        eventHandler(&event, player); 
+        keyBoardPolling(player); 
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+
+        world->updateCamera(player);
         world->renderWorld(renderer);
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
