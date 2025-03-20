@@ -2,7 +2,7 @@
 #include <cmath>
 
 Player::Player::Player(int x, int y) {
-    #ifdef DEBUG_MODE
+    #if DEBUG_MODE
         std::cout << "Player object created" << std::endl;
     #endif
 
@@ -20,7 +20,7 @@ Player::Player::Player(int x, int y) {
 }
 
 Player::Player::~Player() {
-    #ifdef DEBUG_MODE
+    #if DEBUG_MODE
         std::cout << "Player object deleted" << std::endl;
     #endif
 }

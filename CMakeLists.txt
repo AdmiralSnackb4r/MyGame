@@ -7,8 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
+set(PROJECT_ROOT "${CMAKE_SOURCE_DIR}")
+configure_file(${CMAKE_SOURCE_DIR}/config/config.h.in ${CMAKE_BINARY_DIR}/config/config.h @ONLY)
+
 add_compile_definitions(
-    DEBUG_MODE=True
+    DEBUG_MODE=1
 )
 
 add_subdirectory(thirdparty/SDL EXCLUDE_FROM_ALL)

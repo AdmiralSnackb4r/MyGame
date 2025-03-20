@@ -49,7 +49,7 @@ int initialize(SDL_Window*& window, SDL_Renderer*& renderer) {
 }
 
 int releasedKeyHandler(SDL_Event* event) {
-#ifdef DEBUG_MODE
+#if DEBUG_MODE
     std::cerr << "Key released: " << SDL_GetKeyName(event->key.key) << std::endl;
 #endif
     return 0;
@@ -77,14 +77,14 @@ int main(int argc, char** argv){
     SDL_Renderer* renderer = nullptr;
     bool done = false;
 
-    Player::Player* player = new Player::Player(100, 100);
-    World::World* world = new World::World(player);
-
     std::cout << "Hello, from MyGame!\n";
 
     if (initialize(window, renderer) != 0) {
         return 1;
     } 
+
+    Player::Player* player = new Player::Player(100, 100);
+    World::World* world = new World::World(player, renderer);
 
     while (!done) {
         SDL_Event event;
@@ -107,7 +107,7 @@ int main(int argc, char** argv){
         SDL_RenderFillRect(renderer, &player->getHitbox());
 
         // Moving Direction of Player
-        #ifdef DEBUG_MODE
+        #if DEBUG_MODE
             float rad = player->getMovingDirection().angle;
             float x1 = player->getPosition().x + 60 * cos(rad);
             float y1 = player->getPosition().y - 60 * sin(rad);
