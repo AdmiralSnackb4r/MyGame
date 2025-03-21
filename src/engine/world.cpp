@@ -32,6 +32,9 @@ World::World::World(Player::Player *player, SDL_Renderer* renderer) {
     std::cout << "World Object created" << std::endl;
 #endif
 
+    mCamera.x = player->getPosition().x - SCREEN_WIDTH/2;
+    mCamera.y = player->getPosition().y - SCREEN_HEIGHT/2;
+
     mTileTextures[0] = loadTexture(backgroundBMP, renderer);
     mTileTextures[1] = loadTexture(dirtBMP, renderer);
 
@@ -46,6 +49,11 @@ World::World::~World() {
     SDL_DestroyTexture(mTileTextures[0]);
     SDL_DestroyTexture(mTileTextures[1]);
 
+}
+
+const SDL_FRect World::World::getMovementArea()
+{
+    return mPlayerMoveArea;
 }
 
 void World::World::generateWorld() {
@@ -91,14 +99,13 @@ void World::World::renderWorld(SDL_Renderer *&renderer) {
 
 void World::World::updateCamera(Player::Player *player) {
 
-    mCamera.x = player->getPosition().x - SCREEN_WIDTH/2;
-    mCamera.y = player->getPosition().y - SCREEN_HEIGHT/2;
-
-    if (mCamera.x < 0) mCamera.x = 0;
-    if (mCamera.y < 0) mCamera.y = 0;
-    if (mCamera.x > WORLD_WIDTH * TILE_SIZE - SCREEN_WIDTH)
-        mCamera.x = WORLD_WIDTH * TILE_SIZE - SCREEN_WIDTH;
-    if (mCamera.y > WORLD_HEIGHT * TILE_SIZE - SCREEN_HEIGHT)
-        mCamera.y = WORLD_HEIGHT * TILE_SIZE - SCREEN_HEIGHT;
+    if (player->getPosition().x - player->getPosition().w <= mPlayerMoveArea.x) {
+        // Player hits the left boundary -> Move the world to the right
+        mCamera.x = std::max(0, static_cast<int>(mCamera.x - player->getMovingDirection().velocityX));
+    } 
+    else if (player->getPosition().x + player->getPosition().w >= mPlayerMoveArea.x + mPlayerMoveArea.w) {
+        // Player hits the right boundary -> Move the world to the left
+        mCamera.x = std::min(WORLD_WIDTH * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.x + player->getMovingDirection().velocityX));
+    }
 
 }

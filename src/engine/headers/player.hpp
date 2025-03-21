@@ -13,14 +13,20 @@ namespace Player {
 
     struct MovingDirection {
         float angle;
-        float velocity;
-        float acceleration;
+        float velocityX;
+        float accelerationX;
+
+        float velocityY;
+        float gravity;
+        float jumpStrength;
 
     };
 
     struct Position {
         int x;
         int y;
+        int w;
+        int h;
     };
 
     struct Status {
@@ -39,7 +45,12 @@ namespace Player {
             const SDL_FRect& getHitbox() const;
             const MovingDirection getMovingDirection();
             const Position getPosition();
-            void walkTo(float angle);
+
+            void setVelocity(float velocity);
+
+            void walkTo(float angle, SDL_FRect PlayerMovementArea);
+            void jump();
+            void update();
 
         private:
             SDL_FRect mHitbox; // Hitbox properties

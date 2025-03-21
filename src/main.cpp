@@ -48,23 +48,43 @@ int initialize(SDL_Window*& window, SDL_Renderer*& renderer) {
     return 0;
 }
 
-int releasedKeyHandler(SDL_Event* event) {
-#if DEBUG_MODE
-    std::cerr << "Key released: " << SDL_GetKeyName(event->key.key) << std::endl;
-#endif
+int pressedKeyHandler(SDL_Event* event, Player::Player* player) {
+    #if DEBUG_MODE
+        std::cerr << "Key pressed: " << SDL_GetKeyName(event->key.key) << std::endl;
+    #endif
+    switch (event->key.key) {
+        case SDLK_SPACE:
+            player->jump();
+            return 0;
+    }
     return 0;
 }
 
-int keyBoardPolling(Player::Player* player) {
+int releasedKeyHandler(SDL_Event* event, Player::Player* player) {
+    #if DEBUG_MODE
+        std::cerr << "Key released: " << SDL_GetKeyName(event->key.key) << std::endl;
+    #endif
+    switch (event->key.key) {
+        case SDLK_A:
+            player->setVelocity(0.0f);
+            return 0;
+        case SDLK_D:
+            player->setVelocity(0.0f);
+            return 0;
+    }
+    return 0;
+}
+
+int keyBoardPolling(Player::Player* player, SDL_FRect movementArea) {
 
     const bool* keyState = SDL_GetKeyboardState(nullptr);
 
     if (keyState[SDL_SCANCODE_D]) {
-        player->walkTo(RIGHT_ANGLE);
+        player->walkTo(RIGHT_ANGLE, movementArea);
         return 0;
     }
     if (keyState[SDL_SCANCODE_A]) {
-        player->walkTo(LEFT_ANGLE);
+        player->walkTo(LEFT_ANGLE, movementArea);
         return 0;
     }
     return 0;
@@ -83,7 +103,7 @@ int main(int argc, char** argv){
         return 1;
     } 
 
-    Player::Player* player = new Player::Player(100, 100);
+    Player::Player* player = new Player::Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
     World::World* world = new World::World(player, renderer);
 
     while (!done) {
@@ -93,15 +113,27 @@ int main(int argc, char** argv){
             if (event.type == SDL_EVENT_QUIT) {
                 done = true;
             }
+            switch (event.type) {
+                case SDL_EVENT_KEY_DOWN:
+                    pressedKeyHandler(&event, player);
+                    break;
+
+                case SDL_EVENT_KEY_UP:
+                    releasedKeyHandler(&event, player);
+                    break;
+
+            }
         }
         
-        keyBoardPolling(player); 
+        keyBoardPolling(player, world->getMovementArea()); 
+        player->update();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
         world->updateCamera(player);
         world->renderWorld(renderer);
+
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderFillRect(renderer, &player->getHitbox());
