@@ -1,2 +1,13 @@
 #pragma once
+
 #define PROJECT_ROOT "@PROJECT_ROOT@"
+
+#define TILE_SIZE 32
+#define WORLD_WIDTH 250
+#define WORLD_HEIGHT 150
+#define PERCENTAGE_SKY 0.3f
+#define PERCENTAGE_GROUND (1.0f - PERCENTAGE_SKY)
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
+
+#define VELOCITY_Y_MAX 10.0f

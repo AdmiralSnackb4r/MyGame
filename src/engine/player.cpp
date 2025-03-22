@@ -1,5 +1,4 @@
 #include "player.hpp"
-#include <cmath>
 
 Player::Player::Player(int x, int y) {
     #if DEBUG_MODE
@@ -23,7 +22,7 @@ Player::Player::Player(int x, int y) {
     mMovingDirection.velocityY = 0.0f;
 
 
-    update();
+    updateHitbox();
 
 }
 
@@ -45,20 +44,28 @@ const Player::Position Player::Player::getPosition() {
     return mPosition;
 }
 
+const bool Player::Player::isOnGround() {
+    return mStatus.onGround;
+}
+
 void Player::Player::setVelocity(float velocity) {
     mMovingDirection.velocityX = velocity;
 }
 
-void Player::Player::walkTo(float angle, SDL_FRect PlayerMovementArea) {
+void Player::Player::setGround(bool onGround) {
+    mStatus.onGround = onGround;
+}
+
+void Player::Player::walkTo(float angle, const SDL_FRect* PlayerMovementArea) {
     if (mStatus.onGround) {
         mMovingDirection.angle = angle;
         mMovingDirection.velocityX = walkingSpeed;
         int tmp_x = static_cast<int>(mPosition.x + (walkingSpeed * cos(angle)));
-        if (tmp_x > PlayerMovementArea.x && tmp_x < (PlayerMovementArea.x + PlayerMovementArea.w)) {
+        if (tmp_x > PlayerMovementArea->x && tmp_x < (PlayerMovementArea->x + PlayerMovementArea->w)) {
             mPosition.x = tmp_x;
-            update();
         }
     }
+    updateHitbox();
 }
 
 void Player::Player::jump() {
@@ -68,14 +75,21 @@ void Player::Player::jump() {
     }
 }
 
-void Player::Player::update() {
+void Player::Player::update(const SDL_FRect* PlayerMovementArea) {
 
     if (!mStatus.onGround) {
-        mPosition.y += mMovingDirection.velocityY;
+        int tmp_y = static_cast<int>(mPosition.y + mMovingDirection.velocityY);
+        if (tmp_y > PlayerMovementArea->y && tmp_y < (PlayerMovementArea->y + PlayerMovementArea->h)) {
+            mPosition.y += mMovingDirection.velocityY;
+        }
 
         mMovingDirection.velocityY += mMovingDirection.gravity;
+        mMovingDirection.velocityY = std::min(mMovingDirection.velocityY, VELOCITY_Y_MAX);
 
+    } else {
+        mMovingDirection.velocityY = 0.0f;
     }
+
     updateHitbox();
 
 }

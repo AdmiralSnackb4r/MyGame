@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <vector>
 #include <iostream>
+#include <cmath>
+#include "config.h"
 
 namespace Player {
 
@@ -45,12 +47,14 @@ namespace Player {
             const SDL_FRect& getHitbox() const;
             const MovingDirection getMovingDirection();
             const Position getPosition();
+            const bool isOnGround();
 
             void setVelocity(float velocity);
+            void setGround(bool onGround);
 
-            void walkTo(float angle, SDL_FRect PlayerMovementArea);
+            void walkTo(float angle, const SDL_FRect* PlayerMovementArea);
             void jump();
-            void update();
+            void update(const SDL_FRect* PlayerMovementArea);
 
         private:
             SDL_FRect mHitbox; // Hitbox properties

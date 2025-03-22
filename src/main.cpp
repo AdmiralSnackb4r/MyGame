@@ -75,7 +75,7 @@ int releasedKeyHandler(SDL_Event* event, Player::Player* player) {
     return 0;
 }
 
-int keyBoardPolling(Player::Player* player, SDL_FRect movementArea) {
+int keyBoardPolling(Player::Player* player, const SDL_FRect* movementArea) {
 
     const bool* keyState = SDL_GetKeyboardState(nullptr);
 
@@ -106,6 +106,8 @@ int main(int argc, char** argv){
     Player::Player* player = new Player::Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
     World::World* world = new World::World(player, renderer);
 
+    world->addEntity(player);
+
     while (!done) {
         SDL_Event event;
 
@@ -126,7 +128,8 @@ int main(int argc, char** argv){
         }
         
         keyBoardPolling(player, world->getMovementArea()); 
-        player->update();
+        player->update(world->getMovementArea());
+        world->update();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -149,7 +152,7 @@ int main(int argc, char** argv){
 
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(1);
+        SDL_Delay(10);
     }
 
 

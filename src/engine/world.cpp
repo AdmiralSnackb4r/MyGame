@@ -51,9 +51,13 @@ World::World::~World() {
 
 }
 
-const SDL_FRect World::World::getMovementArea()
+void World::World::addEntity(Player::Player *entity) {
+    mEntities.push_back(entity);
+}
+
+const SDL_FRect* World::World::getMovementArea()
 {
-    return mPlayerMoveArea;
+    return &mPlayerMoveArea;
 }
 
 void World::World::generateWorld() {
@@ -108,4 +112,42 @@ void World::World::updateCamera(Player::Player *player) {
         mCamera.x = std::min(WORLD_WIDTH * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.x + player->getMovingDirection().velocityX));
     }
 
+    if (player->getPosition().y - player->getPosition().h <= mPlayerMoveArea.y) {
+        // Player hits the upper boundary -> Move the world to the bottom
+        mCamera.y = std::max(0, static_cast<int>(mCamera.y - player->getMovingDirection().velocityY));
+    } 
+    else if (player->getPosition().y + player->getPosition().h >= mPlayerMoveArea.y + mPlayerMoveArea.h) {
+        // Player hits the lower boundary -> Move the world to the top
+        mCamera.y = std::min(WORLD_HEIGHT * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.y + player->getMovingDirection().velocityY));
+    }
+
+}
+
+void World::World::update() {
+
+    int left;
+    int right;
+    int bottom;
+
+    bool onGround;
+
+    for (Player::Player* entity : mEntities) {
+        if (entity->isOnGround()) continue;
+
+        left = entity->getPosition().x / TILE_SIZE;
+        right = (entity->getPosition().x + entity->getPosition().w) / TILE_SIZE;
+        bottom = (entity->getPosition().y + entity->getPosition().h) / TILE_SIZE;
+
+        onGround = false;
+        for (int x = left; x <= right; ++x) {
+            if (mMap[bottom][x] == 1) {
+                #ifdef DEBUG_MODE
+                    std::cout << "Collision with ground detected" << std::endl;
+                #endif
+                onGround = true;
+                break;
+            }
+        }
+        entity->setGround(onGround);
+    }
 }
