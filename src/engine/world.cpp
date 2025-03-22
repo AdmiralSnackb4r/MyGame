@@ -35,8 +35,8 @@ World::World::World(Player::Player *player, SDL_Renderer* renderer) {
     mCamera.x = player->getPosition().x - SCREEN_WIDTH/2;
     mCamera.y = player->getPosition().y - SCREEN_HEIGHT/2;
 
-    mTileTextures[0] = loadTexture(backgroundBMP, renderer);
-    mTileTextures[1] = loadTexture(dirtBMP, renderer);
+    mTileTextures[0] = loadTexture(backgroundBMP.string(), renderer);
+    mTileTextures[1] = loadTexture(dirtBMP.string(), renderer);
 
     updateCamera(player);
     generateWorld();
