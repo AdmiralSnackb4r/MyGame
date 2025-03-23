@@ -15,5 +15,14 @@ add_compile_definitions(
     DEBUG_MODE=1
 )
 
-add_subdirectory(thirdparty/SDL EXCLUDE_FROM_ALL)
+include(FetchContent)
+
+# Declare SDL3
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.2.8
+)
+FetchContent_MakeAvailable(SDL3)
+
 add_subdirectory(src)
