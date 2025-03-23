@@ -65,6 +65,14 @@ void Player::setGround(bool onGround) {
     mStatus.onGround = onGround;
 }
 
+void Player::setInWorldX(int x) {
+    mPosition.x_inWorld = x;
+}
+
+void Player::setInWorldY(int y) {
+    mPosition.y_inWorld = y;
+}
+
 void Player::walkTo(float angle, const SDL_FRect* PlayerMovementArea) {
     if (mStatus.onGround) {
         mMovingDirection.angle = angle;
@@ -78,6 +86,7 @@ void Player::walkTo(float angle, const SDL_FRect* PlayerMovementArea) {
         if (tmp_x_inWorld - mPosition.w > 0 && tmp_x_inWorld + mPosition.w < WORLD_WIDTH * TILE_SIZE) {
             mPosition.x_inWorld = tmp_x_inWorld;
         }
+
     }
     updateHitbox();
     updateRenderbox();

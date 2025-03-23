@@ -58,6 +58,8 @@ namespace Player {
 
             void setVelocity(float velocity);
             void setGround(bool onGround);
+            void setInWorldX(int x);
+            void setInWorldY(int y);
 
             void walkTo(float angle, const SDL_FRect* PlayerMovementArea);
             void jump();

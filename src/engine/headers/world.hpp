@@ -38,6 +38,8 @@ namespace World {
             const SDL_FRect mPlayerMoveArea = {SCREEN_WIDTH*0.2, SCREEN_HEIGHT*0.3, SCREEN_WIDTH*0.6, SCREEN_HEIGHT*0.4};
             SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
             SDL_Texture* mTileTextures[2];
+            int mMovementBufferX{0};
+            int mMovementBufferY{0};
 
         public:
             World(Player::Player* player, SDL_Renderer* renderer);

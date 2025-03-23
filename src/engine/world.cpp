@@ -120,6 +120,7 @@ void World::World::updateCamera(Player::Player *player) {
         // Player hits the lower boundary -> Move the world to the top
         mCamera.y = std::min(WORLD_HEIGHT * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.y + player->getMovingDirection().velocityY));
     }
+    
 
 }
 

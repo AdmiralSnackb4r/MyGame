@@ -144,6 +144,9 @@ int main(int argc, char** argv){
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_RenderFillRect(renderer, &player->getRenderbox());
 
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_RenderFillRect(renderer, &player->getHitbox());
+
         // Moving Direction of Player
         #if DEBUG_MODE
             float rad = player->getMovingDirection().angle;
