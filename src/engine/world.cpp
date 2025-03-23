@@ -32,8 +32,8 @@ World::World::World(Player::Player *player, SDL_Renderer* renderer) {
     std::cout << "World Object created" << std::endl;
 #endif
 
-    mCamera.x = player->getPosition().x_onScreen - SCREEN_WIDTH/2;
-    mCamera.y = player->getPosition().y_onScreen - SCREEN_HEIGHT/2;
+    mCamera.x = player->getPosition().x_onScreen;
+    mCamera.y = player->getPosition().y_onScreen;
 
     mTileTextures[0] = loadTexture(backgroundBMP.string(), renderer);
     mTileTextures[1] = loadTexture(dirtBMP.string(), renderer);
@@ -103,22 +103,22 @@ void World::World::renderWorld(SDL_Renderer *&renderer) {
 
 void World::World::updateCamera(Player::Player *player) {
 
-    if (player->getPosition().x_onScreen - player->getPosition().w <= mPlayerMoveArea.x) {
+    if (player->getPosition().x_onScreen - (player->getPosition().w/2) <= mPlayerMoveArea.x) {
         // Player hits the left boundary -> Move the world to the right
         mCamera.x = std::max(0, static_cast<int>(mCamera.x - player->getMovingDirection().velocityX));
     } 
-    else if (player->getPosition().x_onScreen + player->getPosition().w >= mPlayerMoveArea.x + mPlayerMoveArea.w) {
+    else if (player->getPosition().x_onScreen + (player->getPosition().w/2) >= mPlayerMoveArea.x + mPlayerMoveArea.w) {
         // Player hits the right boundary -> Move the world to the left
         mCamera.x = std::min(WORLD_WIDTH * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.x + player->getMovingDirection().velocityX));
     }
 
-    if (player->getPosition().y_onScreen - player->getPosition().h <= mPlayerMoveArea.y) {
+    if (player->getPosition().y_onScreen - (player->getPosition().h/2) <= mPlayerMoveArea.y) {
         // Player hits the upper boundary -> Move the world to the bottom
         mCamera.y = std::max(0, static_cast<int>(mCamera.y - player->getMovingDirection().velocityY));
     } 
-    else if (player->getPosition().y_onScreen + player->getPosition().h >= mPlayerMoveArea.y + mPlayerMoveArea.h) {
+    else if (player->getPosition().y_onScreen + (player->getPosition().h/2) >= mPlayerMoveArea.y + mPlayerMoveArea.h) {
         // Player hits the lower boundary -> Move the world to the top
-        mCamera.y = std::min(WORLD_HEIGHT * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.y + player->getMovingDirection().velocityY));
+        mCamera.y = std::min(WORLD_HEIGHT * TILE_SIZE - SCREEN_HEIGHT, static_cast<int>(mCamera.y + player->getMovingDirection().velocityY));
     }
     
 

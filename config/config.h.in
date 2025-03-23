@@ -2,7 +2,7 @@
 
 #define PROJECT_ROOT "@PROJECT_ROOT@"
 
-#define TILE_SIZE 32
+#define TILE_SIZE 128
 #define WORLD_WIDTH 250
 #define WORLD_HEIGHT 150
 #define PERCENTAGE_SKY 0.3f

@@ -29,13 +29,13 @@ namespace Player {
 
     struct Position {
 
-        int x_onScreen;
-        int x_inWorld;
-        int y_onScreen;
-        int y_inWorld;
+        float x_onScreen;
+        float x_inWorld;
+        float y_onScreen;
+        float y_inWorld;
         
-        int w;
-        int h;
+        float w;
+        float h;
     };
 
     struct Status {

@@ -11,8 +11,8 @@ Player::Player(int x, int y) {
     mPosition.x_onScreen = x;
     mPosition.y_inWorld = y;
     mPosition.y_onScreen = y;
-    mPosition.w = 32;
-    mPosition.h = 32;
+    mPosition.w = 64;
+    mPosition.h = 128;
 
     mStatus.onGround = true;
 
@@ -83,7 +83,7 @@ void Player::walkTo(float angle, const SDL_FRect* PlayerMovementArea) {
         if (tmp_x_onScreen > PlayerMovementArea->x && tmp_x_onScreen < (PlayerMovementArea->x + PlayerMovementArea->w)) {
             mPosition.x_onScreen = tmp_x_onScreen;
         }
-        if (tmp_x_inWorld - mPosition.w > 0 && tmp_x_inWorld + mPosition.w < WORLD_WIDTH * TILE_SIZE) {
+        if (tmp_x_inWorld > 0 && tmp_x_inWorld < WORLD_WIDTH * TILE_SIZE) {
             mPosition.x_inWorld = tmp_x_inWorld;
         }
 
@@ -107,7 +107,7 @@ void Player::update(const SDL_FRect* PlayerMovementArea) {
         if (tmp_y_onScreen > PlayerMovementArea->y && tmp_y_onScreen < (PlayerMovementArea->y + PlayerMovementArea->h)) {
             mPosition.y_onScreen = tmp_y_onScreen;
         }
-        if (tmp_y_inWorld - mPosition.h > 0 && tmp_y_inWorld + mPosition.h < (WORLD_HEIGHT * TILE_SIZE)) {
+        if (tmp_y_inWorld > 0 && tmp_y_inWorld < (WORLD_HEIGHT * TILE_SIZE)) {
             mPosition.y_inWorld = tmp_y_inWorld;
         }
 
@@ -124,15 +124,13 @@ void Player::update(const SDL_FRect* PlayerMovementArea) {
 }
 
 void Player::updateHitbox() {
-    mHitbox = {(mPosition.x_inWorld - static_cast<float>(mPosition.w)/2),
-        (mPosition.y_inWorld - static_cast<float>(mPosition.h)/2),
-         playerWidth, playerHeight};
+    mHitbox = {mPosition.x_inWorld, mPosition.y_inWorld,
+         mPosition.w, mPosition.h};
 }
 
 void Player::updateRenderbox() {
-    mRenderbox = {(mPosition.x_onScreen - static_cast<float>(mPosition.w)/2),
-        (mPosition.y_onScreen - static_cast<float>(mPosition.h)/2),
-         playerWidth, playerHeight};
+    mRenderbox = {mPosition.x_onScreen, mPosition.y_onScreen,
+        mPosition.w, mPosition.h};
 }
 
 }
