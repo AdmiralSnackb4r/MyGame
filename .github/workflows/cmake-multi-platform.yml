@@ -54,15 +54,22 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      # Install SDL on both Windows & Linux
-      - name: Install SDL dependencies
+      # 🟢 Install SDL on Linux
+      - name: Install SDL dependencies (Linux)
+        if: runner.os == 'Linux'
         uses: libsdl-org/setup-sdl@main
-        id: sdl
+        id: sdl-linux
         with:
           install-linux-dependencies: true
-          install-windows-dependencies: true
           version: 3-latest
           version-sdl-image: 3-latest
+
+      # 🔵 Install SDL on Windows using vcpkg
+      - name: Install SDL dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg install sdl3:x64-windows sdl3-image:x64-windows
+          echo "CMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
