@@ -1,11 +1,14 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "config.h"
+
 #include <SDL3/SDL.h>
 #include <vector>
 #include <iostream>
+
+#define _USE_MATH_DEFINES
 #include <cmath>
-#include "config.h"
 
 namespace Player {
 
@@ -25,8 +28,13 @@ namespace Player {
     };
 
     struct Position {
-        int x;
-        int y;
+
+
+        int x_onScreen;
+        int x_inWorld;
+        int y_onScreen;
+        int y_inWorld;
+        
         int w;
         int h;
     };

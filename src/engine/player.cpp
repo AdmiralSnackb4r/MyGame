@@ -5,8 +5,12 @@ Player::Player::Player(int x, int y) {
         std::cout << "Player object created" << std::endl;
     #endif
 
-    mPosition.x = x;
-    mPosition.y = y;
+    mPosition.x_onScreen = x;
+    mPosition.x_inWorld = x;
+    mPosition.y_onScreen = y;
+    mPosition.y_inWorld = y;
+
+
     mPosition.w = 32;
     mPosition.h = 32;
 

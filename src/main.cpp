@@ -3,6 +3,9 @@
 #include <SDL3/SDL_main.h>
 #include <player.hpp>
 #include <world.hpp>
+
+
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 constexpr double LEFT_ANGLE = M_PI;
