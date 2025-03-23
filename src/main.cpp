@@ -142,15 +142,15 @@ int main(int argc, char** argv){
 
 
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &player->getHitbox());
+        SDL_RenderFillRect(renderer, &player->getRenderbox());
 
         // Moving Direction of Player
         #if DEBUG_MODE
             float rad = player->getMovingDirection().angle;
-            float x1 = player->getPosition().x + 60 * cos(rad);
-            float y1 = player->getPosition().y - 60 * sin(rad);
-            SDL_RenderLine(renderer, (int)player->getPosition().x,
-                    (int)player->getPosition().y, (int)x1, (int)y1);
+            float x1 = player->getPosition().x_onScreen + 60 * cos(rad);
+            float y1 = player->getPosition().y_onScreen - 60 * sin(rad);
+            SDL_RenderLine(renderer, (int)player->getPosition().x_onScreen,
+                    (int)player->getPosition().y_onScreen, (int)x1, (int)y1);
         #endif
 
         SDL_RenderPresent(renderer);

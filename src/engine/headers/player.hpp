@@ -29,7 +29,6 @@ namespace Player {
 
     struct Position {
 
-
         int x_onScreen;
         int x_inWorld;
         int y_onScreen;
@@ -50,11 +49,11 @@ namespace Player {
             Player(int x, int y);
             ~Player();
 
-
-
             const SDL_FRect& getHitbox() const;
-            const MovingDirection getMovingDirection();
-            const Position getPosition();
+            const SDL_FRect& getRenderbox() const;
+            const MovingDirection& getMovingDirection() const;
+            const Position& getPosition() const;
+
             const bool isOnGround();
 
             void setVelocity(float velocity);
@@ -65,7 +64,8 @@ namespace Player {
             void update(const SDL_FRect* PlayerMovementArea);
 
         private:
-            SDL_FRect mHitbox; // Hitbox properties
+            SDL_FRect mHitbox;
+            SDL_FRect mRenderbox;
             std::vector<int> mActiveSprite = {0};
 
             MovingDirection mMovingDirection;
@@ -73,6 +73,7 @@ namespace Player {
             Status mStatus;
 
             void updateHitbox();
+            void updateRenderbox();
 
 
     };
