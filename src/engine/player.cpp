@@ -2,32 +2,37 @@
 
 namespace Player {
 
-Player::Player(int x, int y) {
+fs::path basePath = PROJECT_ROOT;
+fs::path textures = "textures";
+fs::path player = "player";
+fs::path normal = "Player.bmp";
+fs::path normalBMP = basePath / textures / player / normal;
+
+Player::Player(int x, int y, SDL_Renderer* renderer) : mRenderRef{renderer} {
+
     #if DEBUG_MODE
         std::cout << "Player object created" << std::endl;
     #endif
 
-    mPosition.x_inWorld = x;
-    mPosition.x_onScreen = x;
-    mPosition.y_inWorld = y;
-    mPosition.y_onScreen = y;
-    mPosition.w = 64;
-    mPosition.h = 128;
+    // Initialize hitbox properties
+    mHitbox.x = x;
+    mHitbox.y = y;
+    mHitbox.w = 64;
+    mHitbox.h = 128;
 
+    // Initialize status properties
     mStatus.onGround = true;
 
-
+    // Initialize movement properties
     mMovingDirection.angle = 0.0f;
     mMovingDirection.velocityX = 0.0f;
     mMovingDirection.accelerationX = 0.0f;
     mMovingDirection.gravity = 0.2f;
     mMovingDirection.jumpStrength = -10.0f;
-    
     mMovingDirection.velocityY = 0.0f;
 
-
-    updateHitbox();
-    updateRenderbox();
+    // Load player texture
+    mPlayerTextures[0] = textureUtils::loadTexture(normalBMP.string(), mRenderRef);
 
 }
 
@@ -41,16 +46,8 @@ const SDL_FRect& Player::getHitbox() const {
     return mHitbox;
 }
 
-const SDL_FRect &Player::getRenderbox() const {
-    return mRenderbox;
-}
-
 const MovingDirection &Player::getMovingDirection() const {
     return mMovingDirection;
-}
-
-const Position &Player::getPosition() const {
-    return mPosition;
 }
 
 const bool Player::isOnGround() {
@@ -66,71 +63,70 @@ void Player::setGround(bool onGround) {
 }
 
 void Player::setInWorldX(int x) {
-    mPosition.x_inWorld = x;
+    mHitbox.x = x;
 }
 
 void Player::setInWorldY(int y) {
-    mPosition.y_inWorld = y;
+    mHitbox.y = y;
 }
 
-void Player::walkTo(float angle, const SDL_FRect* PlayerMovementArea) {
-    if (mStatus.onGround) {
-        mMovingDirection.angle = angle;
-        mMovingDirection.velocityX = walkingSpeed;
-        float cosAngle = cos(angle);
-        int tmp_x_inWorld = static_cast<int>(mPosition.x_inWorld + (walkingSpeed * cosAngle));
-        int tmp_x_onScreen = static_cast<int>(mPosition.x_onScreen + (walkingSpeed * cosAngle));
-        if (tmp_x_onScreen > PlayerMovementArea->x && tmp_x_onScreen < (PlayerMovementArea->x + PlayerMovementArea->w)) {
-            mPosition.x_onScreen = tmp_x_onScreen;
-        }
-        if (tmp_x_inWorld > 0 && tmp_x_inWorld < WORLD_WIDTH * TILE_SIZE) {
-            mPosition.x_inWorld = tmp_x_inWorld;
-        }
+void Player::walkTo(float angle) {
 
+    if (!mStatus.onGround) return;
+
+    // Update movement direction
+    mMovingDirection.angle = angle;
+    mMovingDirection.velocityX = WALKING_SPEED;
+
+    // Calculate new X position
+    int newX = static_cast<int>(mHitbox.x + (WALKING_SPEED * std::cos(angle)));
+
+    // Keep the player within world boundaries
+    if (newX > 0 && newX < WORLD_WIDTH * TILE_SIZE) {
+        mHitbox.x = newX;
     }
-    updateHitbox();
-    updateRenderbox();
 }
 
 void Player::jump() {
+
+    if (!mStatus.onGround) return;
+
+    // Apply jump force
+    mMovingDirection.velocityY = mMovingDirection.jumpStrength;
+    mStatus.onGround = false;
+}
+
+void Player::update() {
+
     if (mStatus.onGround) {
-        mMovingDirection.velocityY = mMovingDirection.jumpStrength;
-        mStatus.onGround = false;
-    }
-}
-
-void Player::update(const SDL_FRect* PlayerMovementArea) {
-
-    if (!mStatus.onGround) {
-        int tmp_y_inWorld = static_cast<int>(mPosition.y_inWorld + mMovingDirection.velocityY);
-        int tmp_y_onScreen = static_cast<int>(mPosition.y_onScreen + mMovingDirection.velocityY);
-        if (tmp_y_onScreen > PlayerMovementArea->y && tmp_y_onScreen < (PlayerMovementArea->y + PlayerMovementArea->h)) {
-            mPosition.y_onScreen = tmp_y_onScreen;
-        }
-        if (tmp_y_inWorld > 0 && tmp_y_inWorld < (WORLD_HEIGHT * TILE_SIZE)) {
-            mPosition.y_inWorld = tmp_y_inWorld;
-        }
-
-        mMovingDirection.velocityY += mMovingDirection.gravity;
-        mMovingDirection.velocityY = std::min(mMovingDirection.velocityY, VELOCITY_Y_MAX);
-
-    } else {
         mMovingDirection.velocityY = 0.0f;
+        return;
     }
 
-    updateHitbox();
-    updateRenderbox();
+    // Calculate the new Y position
+    int newY = static_cast<int>(mHitbox.y + mMovingDirection.velocityY);
 
+    // Ensure the player stays within world boundaries
+    if (newY > 0 && newY < (WORLD_HEIGHT * TILE_SIZE)) {
+        mHitbox.y = newY;
+    }
+
+    // Apply gravity and limit velocity
+    mMovingDirection.velocityY = std::min(mMovingDirection.velocityY + mMovingDirection.gravity, VELOCITY_Y_MAX);
 }
 
-void Player::updateHitbox() {
-    mHitbox = {mPosition.x_inWorld, mPosition.y_inWorld,
-         mPosition.w, mPosition.h};
-}
+void Player::renderPlayer(Camera::Camera *camera) {
 
-void Player::updateRenderbox() {
-    mRenderbox = {mPosition.x_onScreen, mPosition.y_onScreen,
-        mPosition.w, mPosition.h};
+    // Calculate the position of the player relative to the camera viewport
+    SDL_FRect renderRect = {
+        mHitbox.x - camera->getViewport().x,
+        mHitbox.y - camera->getViewport().y,
+        mHitbox.w, 
+        mHitbox.h
+    };
+
+    // Render the player texture to the screen
+    SDL_RenderTexture(mRenderRef, mPlayerTextures[mActiveSprite], nullptr, &renderRect);
 }
 
 }

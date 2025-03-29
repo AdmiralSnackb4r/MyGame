@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <player.hpp>
+#include <camera.hpp>
 #include <world.hpp>
 
 
@@ -78,16 +79,16 @@ int releasedKeyHandler(SDL_Event* event, Player::Player* player) {
     return 0;
 }
 
-int keyBoardPolling(Player::Player* player, const SDL_FRect* movementArea) {
+int keyBoardPolling(Player::Player* player) {
 
     const bool* keyState = SDL_GetKeyboardState(nullptr);
 
     if (keyState[SDL_SCANCODE_D]) {
-        player->walkTo(RIGHT_ANGLE, movementArea);
+        player->walkTo(RIGHT_ANGLE);
         return 0;
     }
     if (keyState[SDL_SCANCODE_A]) {
-        player->walkTo(LEFT_ANGLE, movementArea);
+        player->walkTo(LEFT_ANGLE);
         return 0;
     }
     return 0;
@@ -106,8 +107,9 @@ int main(int argc, char** argv){
         return 1;
     } 
 
-    Player::Player* player = new Player::Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
-    World::World* world = new World::World(player, renderer);
+    Player::Player* player = new Player::Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, renderer);
+    Camera::Camera* camera = new Camera::Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
+    World::World* world = new World::World(player, camera, renderer);
 
     world->addEntity(player);
 
@@ -130,31 +132,17 @@ int main(int argc, char** argv){
             }
         }
         
-        keyBoardPolling(player, world->getMovementArea()); 
-        player->update(world->getMovementArea());
+        keyBoardPolling(player); 
+        player->update();
         world->update();
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        world->updateCamera(player);
-        world->renderWorld(renderer);
+        camera->update(player->getHitbox());
 
-
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &player->getRenderbox());
-
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_RenderFillRect(renderer, &player->getHitbox());
-
-        // Moving Direction of Player
-        #if DEBUG_MODE
-            float rad = player->getMovingDirection().angle;
-            float x1 = player->getPosition().x_onScreen + 60 * cos(rad);
-            float y1 = player->getPosition().y_onScreen - 60 * sin(rad);
-            SDL_RenderLine(renderer, (int)player->getPosition().x_onScreen,
-                    (int)player->getPosition().y_onScreen, (int)x1, (int)y1);
-        #endif
+        world->renderWorld(camera, renderer);
+        player->renderPlayer(camera);
 
         SDL_RenderPresent(renderer);
 

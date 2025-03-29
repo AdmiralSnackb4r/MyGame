@@ -10,10 +10,8 @@ namespace World {
 
     fs::path backgroundBMP = basePath / textures / world / background;
     fs::path dirtBMP = basePath / textures / world / dirt;
-}
 
-
-SDL_Texture *World::World::loadTexture(const std::string &path, SDL_Renderer *renderer) {
+SDL_Texture *World::loadTexture(const std::string &path, SDL_Renderer *renderer) {
     SDL_Surface* surface = SDL_LoadBMP(path.c_str());
                 if (!surface) {
                     SDL_Log("Failed to load texture: %s", SDL_GetError());
@@ -27,22 +25,19 @@ SDL_Texture *World::World::loadTexture(const std::string &path, SDL_Renderer *re
                 return texture;
 }
 
-World::World::World(Player::Player *player, SDL_Renderer* renderer) {
+World::World(Player::Player *player, Camera::Camera* camera, SDL_Renderer* renderer) {
 #if DEBUG_MODE
     std::cout << "World Object created" << std::endl;
 #endif
 
-    mCamera.x = player->getPosition().x_onScreen;
-    mCamera.y = player->getPosition().y_onScreen;
-
     mTileTextures[0] = loadTexture(backgroundBMP.string(), renderer);
     mTileTextures[1] = loadTexture(dirtBMP.string(), renderer);
 
-    updateCamera(player);
+    camera->update(player->getHitbox());
     generateWorld();
 }
 
-World::World::~World() {
+World::~World() {
     #if DEBUG_MODE
         std::cout << "World Object deleted" << std::endl;
     #endif
@@ -51,16 +46,16 @@ World::World::~World() {
 
 }
 
-void World::World::addEntity(Player::Player *entity) {
+void World::addEntity(Player::Player *entity) {
     mEntities.push_back(entity);
 }
 
-const SDL_FRect* World::World::getMovementArea()
+const SDL_FRect* World::getMovementArea()
 {
     return &mPlayerMoveArea;
 }
 
-void World::World::generateWorld() {
+void World::generateWorld() {
     for (int y = 0; y < WORLD_HEIGHT; ++y) {
         for (int x = 0; x < WORLD_WIDTH; ++x) {
             if (y < (WORLD_HEIGHT * PERCENTAGE_SKY)) {    // SKY GENERATION
@@ -74,12 +69,12 @@ void World::World::generateWorld() {
     }
 }
 
-void World::World::renderWorld(SDL_Renderer *&renderer) {
+void World::renderWorld(Camera::Camera* camera, SDL_Renderer *&renderer) {
 
-    int startX = std::max(0, mCamera.x / TILE_SIZE);
-    int startY = std::max(0, mCamera.y / TILE_SIZE);
-    int endX = std::min(WORLD_WIDTH, (mCamera.x + SCREEN_WIDTH) / TILE_SIZE + 1);
-    int endY = std::min(WORLD_HEIGHT, (mCamera.y + SCREEN_HEIGHT) / TILE_SIZE + 1);
+    int startX = std::max(0, camera->getViewport().x / TILE_SIZE);
+    int startY = std::max(0, camera->getViewport().y / TILE_SIZE);
+    int endX = std::min(WORLD_WIDTH, (camera->getViewport().x + SCREEN_WIDTH) / TILE_SIZE + 1);
+    int endY = std::min(WORLD_HEIGHT, (camera->getViewport().y + SCREEN_HEIGHT) / TILE_SIZE + 1);
 
     SDL_FRect tileRect;
     tileRect.w = TILE_SIZE;
@@ -88,8 +83,8 @@ void World::World::renderWorld(SDL_Renderer *&renderer) {
     for (int y = startY; y < endY; ++y) {
         for (int x = startX; x < endX; ++x) {
 
-            tileRect.x = x * TILE_SIZE - mCamera.x;
-            tileRect.y = y * TILE_SIZE - mCamera.y;
+            tileRect.x = x * TILE_SIZE - camera->getViewport().x;
+            tileRect.y = y * TILE_SIZE - camera->getViewport().y;
 
             SDL_RenderTexture(renderer, mTileTextures[mMap[y][x]], nullptr, &tileRect);
 
@@ -101,30 +96,7 @@ void World::World::renderWorld(SDL_Renderer *&renderer) {
     #endif
 }
 
-void World::World::updateCamera(Player::Player *player) {
-
-    if (player->getPosition().x_onScreen - (player->getPosition().w/2) <= mPlayerMoveArea.x) {
-        // Player hits the left boundary -> Move the world to the right
-        mCamera.x = std::max(0, static_cast<int>(mCamera.x - player->getMovingDirection().velocityX));
-    } 
-    else if (player->getPosition().x_onScreen + (player->getPosition().w/2) >= mPlayerMoveArea.x + mPlayerMoveArea.w) {
-        // Player hits the right boundary -> Move the world to the left
-        mCamera.x = std::min(WORLD_WIDTH * TILE_SIZE - SCREEN_WIDTH, static_cast<int>(mCamera.x + player->getMovingDirection().velocityX));
-    }
-
-    if (player->getPosition().y_onScreen - (player->getPosition().h/2) <= mPlayerMoveArea.y) {
-        // Player hits the upper boundary -> Move the world to the bottom
-        mCamera.y = std::max(0, static_cast<int>(mCamera.y - player->getMovingDirection().velocityY));
-    } 
-    else if (player->getPosition().y_onScreen + (player->getPosition().h/2) >= mPlayerMoveArea.y + mPlayerMoveArea.h) {
-        // Player hits the lower boundary -> Move the world to the top
-        mCamera.y = std::min(WORLD_HEIGHT * TILE_SIZE - SCREEN_HEIGHT, static_cast<int>(mCamera.y + player->getMovingDirection().velocityY));
-    }
-    
-
-}
-
-void World::World::update() {
+void World::update() {
 
     int left;
     int right;
@@ -135,9 +107,9 @@ void World::World::update() {
     for (Player::Player* entity : mEntities) {
         if (entity->isOnGround()) continue;
 
-        left = entity->getPosition().x_inWorld / TILE_SIZE;
-        right = (entity->getPosition().x_inWorld + entity->getPosition().w) / TILE_SIZE;
-        bottom = (entity->getPosition().y_inWorld + entity->getPosition().h) / TILE_SIZE;
+        left = entity->getHitbox().x / TILE_SIZE;
+        right = (entity->getHitbox().x + entity->getHitbox().w) / TILE_SIZE;
+        bottom = (entity->getHitbox().y + entity->getHitbox().h) / TILE_SIZE;
 
         onGround = false;
         for (int x = left; x <= right; ++x) {
@@ -151,4 +123,6 @@ void World::World::update() {
         }
         entity->setGround(onGround);
     }
+}
+
 }

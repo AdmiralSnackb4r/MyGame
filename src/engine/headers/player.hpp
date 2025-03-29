@@ -2,81 +2,147 @@
 #define PLAYER_H
 
 #include "config.h"
-
+#include "textureUtils.hpp"
 #include <SDL3/SDL.h>
 #include <vector>
 #include <iostream>
+#include <filesystem>
+#include <cmath>
+#include "camera.hpp"
 
 #define _USE_MATH_DEFINES
-#include <cmath>
+
 
 namespace Player {
 
-    const int playerWidth = 50;
-    const int playerHeight = 50;
-    const float walkingSpeed = 5;
+    namespace fs = std::filesystem;
 
+    // Paths for textures and assets
+    extern fs::path basePath;
+    extern fs::path textures;
+    extern fs::path player;
+    extern fs::path normal;
+    
+    extern fs::path backgroundBMP;
+    extern fs::path dirtBMP;
+
+    // Player constants
+    constexpr int PLAYER_WIDTH = 50;
+    constexpr int PLAYER_HEIGHT = 50;
+    constexpr float WALKING_SPEED = 5.0f;
+
+    /**
+     * @brief Struct representing player's movement properties.
+     * @param angle Movement angle in radians <float> 
+     * @param velocityX Horizontal velocity <float> 
+     * @param accelerationX Horizontal acceleration <float> 
+     * @param velocityY Vertical velocity <float> 
+     * @param gravity Gravity force <float> 
+     * @param jumpStrength Jump force <float> 
+     */
     struct MovingDirection {
-        float angle;
-        float velocityX;
-        float accelerationX;
+        float angle = 0.0f;             ///< Movement angle in radians
+        float velocityX = 0.0f;         ///< Horizontal velocity
+        float accelerationX = 0.0f;     ///< Horizontal acceleration
 
-        float velocityY;
-        float gravity;
-        float jumpStrength;
-
+        float velocityY = 0.0f;         ///< Vertical velocity
+        float gravity = 0.2f;           ///< Gravity force
+        float jumpStrength = -10.0f;    ///< Jump force
     };
 
-    struct Position {
-
-        float x_onScreen;
-        float x_inWorld;
-        float y_onScreen;
-        float y_inWorld;
-        
-        float w;
-        float h;
-    };
-
+    /**
+     * @brief Struct representing player's status 
+     * @param onGround Whether the player is on the ground <bool>
+     */
     struct Status {
-        bool onGround;
+        bool onGround = true; ///< Whether the player is on the ground
     };
 
 
+    /**
+     * @class Player
+     * @brief Represents the player character in the game.
+     */
     class Player {
 
         public:
-            Player(int x, int y);
+
+            /**
+             * @brief Constructor for Player.
+             * @param x Initial x-position <int>
+             * @param y Initial y-position <int>
+             * @param renderer SDL Renderer reference <SDL_Renderer*>
+             */
+            Player(int x, int y, SDL_Renderer* renderer);
+
+            /**
+             * @brief Destructor for Player.
+             */
             ~Player();
 
-            const SDL_FRect& getHitbox() const;
-            const SDL_FRect& getRenderbox() const;
-            const MovingDirection& getMovingDirection() const;
-            const Position& getPosition() const;
-
-            const bool isOnGround();
-
+            // --- Setters ---
+            
+            /**
+             * @param velocity <float>
+             */
             void setVelocity(float velocity);
+
+            /**
+             * @param onGround <bool>
+             */
             void setGround(bool onGround);
+
+            /**
+             * @param x <int>
+             */
             void setInWorldX(int x);
+
+            /**
+             * @param y <int>
+             */
             void setInWorldY(int y);
 
-            void walkTo(float angle, const SDL_FRect* PlayerMovementArea);
+
+            // --- Getters ---
+
+            const SDL_FRect& getHitbox() const;
+            const MovingDirection& getMovingDirection() const;
+            const bool isOnGround();
+
+
+            // --- Player Actions ---
+
+            /**
+             * @brief Moves the player in a specified direction.
+             * @param angle Direction angle in radians <float>
+             */
+            void walkTo(float angle);
+
+            /**
+             * @brief Makes the player jump.
+             */
             void jump();
-            void update(const SDL_FRect* PlayerMovementArea);
+
+            /**
+             * @brief Updates the player with respect to physics [gravity].
+             */
+            void update();
+
+            // --- Rendering ---
+            
+            /**
+             * @brief Renders the player sprite on the screen.
+             * @param camera Camera reference <Camera*>
+             */
+            void renderPlayer(Camera::Camera* camera);
 
         private:
-            SDL_FRect mHitbox;
-            SDL_FRect mRenderbox;
-            std::vector<int> mActiveSprite = {0};
-
-            MovingDirection mMovingDirection;
-            Position mPosition;
-            Status mStatus;
-
-            void updateHitbox();
-            void updateRenderbox();
-
+            SDL_Texture* mPlayerTextures[1] = {nullptr}; ///< Player textures array (single sprite for now)
+            int mActiveSprite = 0; ///< Active sprite index
+            SDL_Renderer* mRenderRef = nullptr; ///< SDL Renderer reference
+            SDL_FRect mHitbox{}; ///< Player hitbox
+            MovingDirection mMovingDirection{}; ///< Movement properties
+            Status mStatus{}; ///< Player's status
 
     };
 
