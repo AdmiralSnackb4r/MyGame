@@ -11,29 +11,14 @@ namespace World {
     fs::path backgroundBMP = basePath / textures / world / background;
     fs::path dirtBMP = basePath / textures / world / dirt;
 
-SDL_Texture *World::loadTexture(const std::string &path, SDL_Renderer *renderer) {
-    SDL_Surface* surface = SDL_LoadBMP(path.c_str());
-                if (!surface) {
-                    SDL_Log("Failed to load texture: %s", SDL_GetError());
-                    return nullptr;
-                }
-                SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-                if (!texture) {
-                    SDL_Log("Failed to create texture: %s", SDL_GetError());
-                }
-                SDL_DestroySurface(surface);
-                return texture;
-}
-
-World::World(Player::Player *player, Camera::Camera* camera, SDL_Renderer* renderer) {
+World::World(Player::Player *player, SDL_Renderer* renderer) : mRenderRef{renderer} {
 #if DEBUG_MODE
     std::cout << "World Object created" << std::endl;
 #endif
 
-    mTileTextures[0] = loadTexture(backgroundBMP.string(), renderer);
-    mTileTextures[1] = loadTexture(dirtBMP.string(), renderer);
+    mTileTextures[0] = textureUtils::loadTexture(backgroundBMP.string(), renderer);
+    mTileTextures[1] = textureUtils::loadTexture(dirtBMP.string(), renderer);
 
-    camera->update(player->getHitbox());
     generateWorld();
 }
 
@@ -47,7 +32,9 @@ World::~World() {
 }
 
 void World::addEntity(Player::Player *entity) {
+    entity->setMapRef(&mMap);
     mEntities.push_back(entity);
+
 }
 
 const SDL_FRect* World::getMovementArea()
@@ -56,20 +43,29 @@ const SDL_FRect* World::getMovementArea()
 }
 
 void World::generateWorld() {
+
+    mMap = std::vector<std::vector<int>>(WORLD_HEIGHT, std::vector<int>(WORLD_WIDTH, 0));
+
+    // Create a simple heightmap
+    std::vector<int> heightMap(WORLD_WIDTH);
+    int baseHeight = WORLD_HEIGHT * PERCENTAGE_SKY;
+
+    for (int x = 0; x < WORLD_WIDTH; ++x) {
+        heightMap[x] = baseHeight + (std::rand() % 5 - 2); // Small variation for hills
+    }
+
     for (int y = 0; y < WORLD_HEIGHT; ++y) {
         for (int x = 0; x < WORLD_WIDTH; ++x) {
-            if (y < (WORLD_HEIGHT * PERCENTAGE_SKY)) {    // SKY GENERATION
-                mMap[y][x] = 0;
-            }
-
-            else if (y > (WORLD_HEIGHT * PERCENTAGE_SKY)) { // GROUND GENERATION
-                mMap[y][x] = 1;
+            if (y < heightMap[x]) {    
+                mMap[y][x] = 0; // Sky
+            } else {    
+                mMap[y][x] = 1; // Ground
             }
         }
     }
 }
 
-void World::renderWorld(Camera::Camera* camera, SDL_Renderer *&renderer) {
+void World::renderWorld(Camera::Camera* camera) {
 
     int startX = std::max(0, camera->getViewport().x / TILE_SIZE);
     int startY = std::max(0, camera->getViewport().y / TILE_SIZE);
@@ -86,13 +82,13 @@ void World::renderWorld(Camera::Camera* camera, SDL_Renderer *&renderer) {
             tileRect.x = x * TILE_SIZE - camera->getViewport().x;
             tileRect.y = y * TILE_SIZE - camera->getViewport().y;
 
-            SDL_RenderTexture(renderer, mTileTextures[mMap[y][x]], nullptr, &tileRect);
+            SDL_RenderTexture(mRenderRef, mTileTextures[mMap[y][x]], nullptr, &tileRect);
 
         }
     }
     #if DEBUG_MODE
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 100);
-    SDL_RenderRect(renderer, &mPlayerMoveArea);
+    SDL_SetRenderDrawColor(mRenderRef, 0, 0, 255, 100);
+    SDL_RenderRect(mRenderRef, &mPlayerMoveArea);
     #endif
 }
 
@@ -105,7 +101,7 @@ void World::update() {
     bool onGround;
 
     for (Player::Player* entity : mEntities) {
-        if (entity->isOnGround()) continue;
+        //if (entity->isOnGround()) continue;
 
         left = entity->getHitbox().x / TILE_SIZE;
         right = (entity->getHitbox().x + entity->getHitbox().w) / TILE_SIZE;
@@ -120,6 +116,7 @@ void World::update() {
                 onGround = true;
                 break;
             }
+            onGround = false;
         }
         entity->setGround(onGround);
     }

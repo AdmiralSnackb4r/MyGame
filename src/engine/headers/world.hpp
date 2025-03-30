@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include "config.h"
+#include "textureUtils.hpp"
 #include <SDL3/SDL.h>
 #include <vector>
 #include <iostream>
@@ -26,17 +27,17 @@ namespace World {
     class World {
 
         private:
-            std::vector<std::vector<int>> mMap = std::vector<std::vector<int>>(WORLD_HEIGHT, std::vector<int>(WORLD_WIDTH, 0));
+            std::vector<std::vector<int>> mMap;
             std::vector<Player::Player*> mEntities; // Temporary of type Player TODO make new class of type Entity
+            SDL_Renderer* mRenderRef = nullptr;
 
             const SDL_FRect mPlayerMoveArea = {SCREEN_WIDTH*0.2, SCREEN_HEIGHT*0.3, SCREEN_WIDTH*0.6, SCREEN_HEIGHT*0.4};
-            SDL_Texture* loadTexture(const std::string &path, SDL_Renderer* renderer);
             SDL_Texture* mTileTextures[2];
             int mMovementBufferX{0};
             int mMovementBufferY{0};
 
         public:
-            World(Player::Player* player,Camera::Camera* camera, SDL_Renderer* renderer);
+            World(Player::Player* player, SDL_Renderer* renderer);
             ~World();
 
             void addEntity(Player::Player* entity); // TODO make this work with class Entity
@@ -44,7 +45,7 @@ namespace World {
             const SDL_FRect* getMovementArea();
 
             void generateWorld();
-            void renderWorld(Camera::Camera* camera, SDL_Renderer*& renderer);
+            void renderWorld(Camera::Camera* camera);
             //void updateCamera(Player::Player* player);
             void update();
 

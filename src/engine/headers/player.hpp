@@ -17,19 +17,11 @@ namespace Player {
 
     namespace fs = std::filesystem;
 
-    // Paths for textures and assets
-    extern fs::path basePath;
-    extern fs::path textures;
-    extern fs::path player;
-    extern fs::path normal;
-    
-    extern fs::path backgroundBMP;
-    extern fs::path dirtBMP;
-
     // Player constants
     constexpr int PLAYER_WIDTH = 50;
     constexpr int PLAYER_HEIGHT = 50;
     constexpr float WALKING_SPEED = 5.0f;
+    constexpr float AIR_MOVEMENT_SPEED = 2.5f;
 
     /**
      * @brief Struct representing player's movement properties.
@@ -103,6 +95,9 @@ namespace Player {
             void setInWorldY(int y);
 
 
+            void setMapRef(std::vector<std::vector<int>>* mapRef);
+
+
             // --- Getters ---
 
             const SDL_FRect& getHitbox() const;
@@ -128,6 +123,9 @@ namespace Player {
              */
             void update();
 
+
+            bool isColliding(int x, int y);
+
             // --- Rendering ---
             
             /**
@@ -140,6 +138,7 @@ namespace Player {
             SDL_Texture* mPlayerTextures[1] = {nullptr}; ///< Player textures array (single sprite for now)
             int mActiveSprite = 0; ///< Active sprite index
             SDL_Renderer* mRenderRef = nullptr; ///< SDL Renderer reference
+            std::vector<std::vector<int>>* mMapRef = {nullptr};
             SDL_FRect mHitbox{}; ///< Player hitbox
             MovingDirection mMovingDirection{}; ///< Movement properties
             Status mStatus{}; ///< Player's status

@@ -109,7 +109,7 @@ int main(int argc, char** argv){
 
     Player::Player* player = new Player::Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, renderer);
     Camera::Camera* camera = new Camera::Camera(SCREEN_WIDTH, SCREEN_HEIGHT);
-    World::World* world = new World::World(player, camera, renderer);
+    World::World* world = new World::World(player, renderer);
 
     world->addEntity(player);
 
@@ -141,7 +141,7 @@ int main(int argc, char** argv){
 
         camera->update(player->getHitbox());
 
-        world->renderWorld(camera, renderer);
+        world->renderWorld(camera);
         player->renderPlayer(camera);
 
         SDL_RenderPresent(renderer);

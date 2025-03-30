@@ -2,6 +2,7 @@
 
 namespace Player {
 
+// Paths for textures and assests
 fs::path basePath = PROJECT_ROOT;
 fs::path textures = "textures";
 fs::path player = "player";
@@ -70,21 +71,33 @@ void Player::setInWorldY(int y) {
     mHitbox.y = y;
 }
 
+void Player::setMapRef(std::vector<std::vector<int>>* mapRef) {
+    mMapRef = mapRef;
+}
+
 void Player::walkTo(float angle) {
 
-    if (!mStatus.onGround) return;
+    if (!mStatus.onGround) {
 
-    // Update movement direction
-    mMovingDirection.angle = angle;
-    mMovingDirection.velocityX = WALKING_SPEED;
+        mMovingDirection.angle = angle;
+        mMovingDirection.velocityX = AIR_MOVEMENT_SPEED;
+
+    } else {
+
+        // Update movement direction
+        mMovingDirection.angle = angle;
+        mMovingDirection.velocityX = WALKING_SPEED;
+
+    }
 
     // Calculate new X position
-    int newX = static_cast<int>(mHitbox.x + (WALKING_SPEED * std::cos(angle)));
+    int newX = static_cast<int>(mHitbox.x + (mMovingDirection.velocityX * std::cos(angle)));
 
     // Keep the player within world boundaries
-    if (newX > 0 && newX < WORLD_WIDTH * TILE_SIZE) {
+    if (newX > 0 && newX < WORLD_WIDTH * TILE_SIZE && !isColliding(newX, mHitbox.y)) {
         mHitbox.x = newX;
     }
+
 }
 
 void Player::jump() {
@@ -115,6 +128,16 @@ void Player::update() {
     mMovingDirection.velocityY = std::min(mMovingDirection.velocityY + mMovingDirection.gravity, VELOCITY_Y_MAX);
 }
 
+bool Player::isColliding(int x, int y) {
+
+    if (!mMapRef) {
+        std::cerr << "Error: Trying to set a null map reference!" << std::endl;
+        return false;
+    }
+
+    return (*mMapRef)[y][x] == 1;
+}
+
 void Player::renderPlayer(Camera::Camera *camera) {
 
     // Calculate the position of the player relative to the camera viewport
@@ -128,5 +151,4 @@ void Player::renderPlayer(Camera::Camera *camera) {
     // Render the player texture to the screen
     SDL_RenderTexture(mRenderRef, mPlayerTextures[mActiveSprite], nullptr, &renderRect);
 }
-
 }
