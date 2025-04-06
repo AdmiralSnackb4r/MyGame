@@ -27,7 +27,7 @@ namespace World {
     class World {
 
         private:
-            std::vector<std::vector<int>> mMap;
+            std::shared_ptr<std::vector<std::vector<int>>> mMap;
             std::vector<Player::Player*> mEntities; // Temporary of type Player TODO make new class of type Entity
             SDL_Renderer* mRenderRef = nullptr;
 

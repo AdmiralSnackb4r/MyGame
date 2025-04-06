@@ -38,7 +38,7 @@ Player::Player(int x, int y, SDL_Renderer* renderer) : mRenderRef{renderer} {
 }
 
 Player::~Player() {
-    #if DEBUG_MODE
+#if DEBUG_MODE
         std::cout << "Player object deleted" << std::endl;
     #endif
 }
@@ -71,7 +71,7 @@ void Player::setInWorldY(int y) {
     mHitbox.y = y;
 }
 
-void Player::setMapRef(std::vector<std::vector<int>>* mapRef) {
+void Player::setMapRef(std::shared_ptr<std::vector<std::vector<int>>> mapRef) {
     mMapRef = mapRef;
 }
 
@@ -130,12 +130,20 @@ void Player::update() {
 
 bool Player::isColliding(int x, int y) {
 
-    if (!mMapRef) {
-        std::cerr << "Error: Trying to set a null map reference!" << std::endl;
-        return false;
-    }
+    int tile_x_start = static_cast<int>(x / TILE_SIZE);
+    int tile_y_start = static_cast<int>(y / TILE_SIZE);
+    int tile_x_end   = static_cast<int>((x + mHitbox.w) / TILE_SIZE);
+    int tile_y_end   = static_cast<int>((y + (mHitbox.h-TILE_SIZE*0.1)) / TILE_SIZE);
 
-    return (*mMapRef)[y][x] == 1;
+    // Check every tile that the hitbox overlaps
+    for (int ty = tile_y_start; ty <= tile_y_end; ++ty) {
+        for (int tx = tile_x_start; tx <= tile_x_end; ++tx) {
+            if ((*mMapRef)[ty][tx] == 1) {
+                return true; // Collision detected
+            }
+        }
+    }
+    return false; // No collision
 }
 
 void Player::renderPlayer(Camera::Camera *camera) {

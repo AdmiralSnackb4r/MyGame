@@ -32,7 +32,7 @@ World::~World() {
 }
 
 void World::addEntity(Player::Player *entity) {
-    entity->setMapRef(&mMap);
+    entity->setMapRef(mMap);
     mEntities.push_back(entity);
 
 }
@@ -44,7 +44,9 @@ const SDL_FRect* World::getMovementArea()
 
 void World::generateWorld() {
 
-    mMap = std::vector<std::vector<int>>(WORLD_HEIGHT, std::vector<int>(WORLD_WIDTH, 0));
+    mMap =  std::make_shared<std::vector<std::vector<int>>>(
+        WORLD_HEIGHT, std::vector<int>(WORLD_WIDTH, 0)
+    );
 
     // Create a simple heightmap
     std::vector<int> heightMap(WORLD_WIDTH);
@@ -57,9 +59,9 @@ void World::generateWorld() {
     for (int y = 0; y < WORLD_HEIGHT; ++y) {
         for (int x = 0; x < WORLD_WIDTH; ++x) {
             if (y < heightMap[x]) {    
-                mMap[y][x] = 0; // Sky
+                (*mMap)[y][x] = 0; // Sky
             } else {    
-                mMap[y][x] = 1; // Ground
+                (*mMap)[y][x] = 1; // Ground
             }
         }
     }
@@ -82,7 +84,7 @@ void World::renderWorld(Camera::Camera* camera) {
             tileRect.x = x * TILE_SIZE - camera->getViewport().x;
             tileRect.y = y * TILE_SIZE - camera->getViewport().y;
 
-            SDL_RenderTexture(mRenderRef, mTileTextures[mMap[y][x]], nullptr, &tileRect);
+            SDL_RenderTexture(mRenderRef, mTileTextures[(*mMap)[y][x]], nullptr, &tileRect);
 
         }
     }
@@ -109,7 +111,7 @@ void World::update() {
 
         onGround = false;
         for (int x = left; x <= right; ++x) {
-            if (mMap[bottom][x] == 1) {
+            if ((*mMap)[bottom][x] == 1) {
                 #ifdef DEBUG_MODE
                     std::cout << "Collision with ground detected" << std::endl;
                 #endif

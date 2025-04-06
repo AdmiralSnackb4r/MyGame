@@ -95,8 +95,7 @@ namespace Player {
             void setInWorldY(int y);
 
 
-            void setMapRef(std::vector<std::vector<int>>* mapRef);
-
+            void setMapRef(std::shared_ptr<std::vector<std::vector<int>>> mapRef);
 
             // --- Getters ---
 
@@ -138,7 +137,7 @@ namespace Player {
             SDL_Texture* mPlayerTextures[1] = {nullptr}; ///< Player textures array (single sprite for now)
             int mActiveSprite = 0; ///< Active sprite index
             SDL_Renderer* mRenderRef = nullptr; ///< SDL Renderer reference
-            std::vector<std::vector<int>>* mMapRef = {nullptr};
+            std::shared_ptr<std::vector<std::vector<int>>> mMapRef = {nullptr};
             SDL_FRect mHitbox{}; ///< Player hitbox
             MovingDirection mMovingDirection{}; ///< Movement properties
             Status mStatus{}; ///< Player's status
