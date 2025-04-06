@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#define _USE_MATH_DEFINES
+
 #include "config.h"
 #include "textureUtils.hpp"
 #include <SDL3/SDL.h>
@@ -9,8 +11,6 @@
 #include <filesystem>
 #include <cmath>
 #include "camera.hpp"
-
-#define _USE_MATH_DEFINES
 
 
 namespace Player {
